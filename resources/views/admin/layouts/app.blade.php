@@ -33,6 +33,8 @@
 
             <main class="admin-content">
 
+
+
                 @yield('content')
 
             </main>
@@ -44,6 +46,47 @@
 
     @stack('scripts')
 
+
+    @if (session('permission_error'))
+        <div id="permissionModal" class="permission-modal-overlay">
+
+            <div class="permission-modal">
+
+                <button type="button" class="permission-modal-close" onclick="closePermissionModal()">
+                    &times;
+                </button>
+
+                <div class="permission-icon">
+                    !
+                </div>
+
+                <h3>Access Restricted</h3>
+
+                <p>
+                    {{ session('permission_error') }}
+                </p>
+
+                <button type="button" class="permission-ok-btn" onclick="closePermissionModal()">
+                    OK
+                </button>
+
+            </div>
+
+        </div>
+    @endif
+    <script>
+        function closePermissionModal() {
+            const modal = document.getElementById('permissionModal');
+
+            if (modal) {
+                modal.remove();
+            }
+        }
+    </script>
+
+</body>
+
+</html>
 </body>
 
 </html>

@@ -59,104 +59,142 @@
                     </span>
 
                     <h2>Today's Menu</h2>
+
+                    <p>
+                        Freshly available items for today.
+                    </p>
                 </div>
 
-                <p>
-                    Freshly available items for today.
-                </p>
+                {{-- ================= SEARCH ================= --}}
+                <form method="GET" action="{{ route('home') }}" class="food-search-form" id="foodSearchForm">
+
+                    <div class="search-input-wrapper">
+
+                        <span class="search-icon">
+                            🔍
+                        </span>
+
+                        <input type="text" name="search" id="foodSearchInput" value="{{ request('search') }}"
+                            placeholder="Search food..." autocomplete="off">
+
+                        <button type="button" id="clearFoodSearch" class="clear-search-btn"
+                            style="{{ request('search') ? '' : 'display:none;' }}">
+                            &times;
+                        </button>
+
+                    </div>
+
+                </form>
 
             </div>
 
-            @if ($foods->count())
 
-                <div class="food-grid">
+            {{-- ================= FOOD RESULTS ================= --}}
+            <div id="foodResults">
 
-                    @foreach ($foods as $food)
-                        <div class="food-card">
+                @if ($foods->count())
 
-                            <div class="food-card-top">
+                    <div class="food-grid">
 
-                                <div class="food-icon">
-                                    🍽️
+                        @foreach ($foods as $food)
+                            <div class="food-card">
+
+                                <div class="food-card-top">
+
+                                    <div class="food-icon">
+                                        🍽️
+                                    </div>
+
+                                    <span class="available-badge">
+                                        Available
+                                    </span>
+
                                 </div>
 
-                                <span class="available-badge">
-                                    Available
-                                </span>
+
+                                <div class="food-card-content">
+
+                                    <span class="food-category">
+                                        {{ $food->category }}
+                                    </span>
+
+                                    <h3>
+                                        {{ $food->name }}
+                                    </h3>
+
+                                    <p>
+                                        {{ $food->description ?: 'Freshly prepared and available today.' }}
+                                    </p>
+
+                                </div>
+
+
+                                <div class="food-card-bottom">
+
+                                    <span class="food-price">
+                                        ₹{{ number_format($food->price, 2) }}
+                                    </span>
+
+                                    <form method="POST" action="{{ route('cart.add', $food->id) }}" class="add-cart-form">
+                                        @csrf
+
+                                        <button type="submit" class="add-cart-btn">
+                                            Add to Cart
+                                        </button>
+
+                                    </form>
+
+                                </div>
 
                             </div>
+                        @endforeach
 
+                    </div>
+                @else
+                    <div class="empty-menu">
 
-                            <div class="food-card-content">
-
-                                <span class="food-category">
-                                    {{ $food->category }}
-                                </span>
-
-                                <h3>
-                                    {{ $food->name }}
-                                </h3>
-
-                                <p>
-                                    {{ $food->description ?: 'Freshly prepared and available today.' }}
-                                </p>
-
-                            </div>
-
-
-                            <div class="food-card-bottom">
-
-                                <span class="food-price">
-                                    ₹{{ number_format($food->price, 2) }}
-                                </span>
-
-                                <form method="POST" action="{{ route('cart.add', $food->id) }}" class="add-cart-form">
-
-                                    @csrf
-
-                                    <button type="submit" class="add-cart-btn">
-                                        Add to Cart
-                                    </button>
-
-                                </form>
-
-                            </div>
-
+                        <div class="empty-icon">
+                            🍽️
                         </div>
-                    @endforeach
 
-                </div>
-            @else
-                <div class="empty-menu">
+                        <h3>
+                            @if (request('search'))
+                                No food found.
+                            @else
+                                Today's menu is being prepared.
+                            @endif
+                        </h3>
 
-                    <div class="empty-icon">
-                        🍽️
+                        <p>
+                            @if (request('search'))
+                                No available food matches your search.
+                            @else
+                                Please check back soon for available food items.
+                            @endif
+                        </p>
+
                     </div>
 
-                    <h3>
-                        Today's menu is being prepared.
-                    </h3>
+                @endif
 
-                    <p>
-                        Please check back soon for available food items.
-                    </p>
-
-                </div>
-
-            @endif
+            </div>
 
 
             {{-- ================= CART DRAWER ================= --}}
 
             @php
+
                 $cart = session('cart', []);
+
                 $cartTotal = 0;
                 $cartCount = 0;
 
                 foreach ($cart as $item) {
                     $cartTotal += $item['price'] * $item['quantity'];
+
                     $cartCount += $item['quantity'];
                 }
+
             @endphp
 
 
@@ -168,11 +206,16 @@
                 <div class="cart-header">
 
                     <div>
+
                         <h2>Your Cart</h2>
 
                         <span class="cart-count-text">
-                            {{ $cartCount }} {{ $cartCount == 1 ? 'item' : 'items' }}
+
+                            {{ $cartCount }}
+                            {{ $cartCount == 1 ? 'item' : 'items' }}
+
                         </span>
+
                     </div>
 
                     <button type="button" class="close-cart" id="closeCart">
@@ -210,9 +253,11 @@
                                 <div class="cart-item-actions">
 
                                     {{-- Quantity --}}
+
                                     <div class="quantity-control">
 
                                         {{-- Decrease --}}
+
                                         <form method="POST" action="{{ route('cart.update', $item['id']) }}"
                                             class="cart-update-form">
 
@@ -227,13 +272,13 @@
                                         </form>
 
 
-                                        {{-- Quantity --}}
                                         <span class="cart-item-quantity">
                                             {{ $item['quantity'] }}
                                         </span>
 
 
                                         {{-- Increase --}}
+
                                         <form method="POST" action="{{ route('cart.update', $item['id']) }}"
                                             class="cart-update-form">
 
@@ -251,12 +296,14 @@
 
 
                                     {{-- Item Total --}}
+
                                     <strong class="cart-item-total" data-food-id="{{ $item['id'] }}">
                                         ₹{{ number_format($itemTotal, 2) }}
                                     </strong>
 
 
                                     {{-- Remove --}}
+
                                     <form method="POST" action="{{ route('cart.remove', $item['id']) }}"
                                         class="cart-remove-form">
 
@@ -349,457 +396,457 @@
 @endsection
 
 @push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function () {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
 
-    const cartDrawer = document.getElementById('cartDrawer');
-    const cartOverlay = document.getElementById('cartOverlay');
-    const openCart = document.getElementById('openCart');
-    const closeCart = document.getElementById('closeCart');
+            const cartDrawer = document.getElementById('cartDrawer');
+            const cartOverlay = document.getElementById('cartOverlay');
+            const openCart = document.getElementById('openCart');
+            const closeCart = document.getElementById('closeCart');
 
 
-    // =====================================================
-    // OPEN CART
-    // =====================================================
+            // =====================================================
+            // OPEN CART
+            // =====================================================
 
-    if (openCart) {
-        openCart.addEventListener('click', function (event) {
-            event.preventDefault();
+            if (openCart) {
+                openCart.addEventListener('click', function(event) {
+                    event.preventDefault();
 
-            if (cartDrawer) {
-                cartDrawer.classList.add('active');
+                    if (cartDrawer) {
+                        cartDrawer.classList.add('active');
+                    }
+
+                    if (cartOverlay) {
+                        cartOverlay.classList.add('active');
+                    }
+
+                    document.body.classList.add('cart-open');
+                });
             }
+
+
+            // =====================================================
+            // CLOSE CART
+            // =====================================================
+
+            if (closeCart) {
+                closeCart.addEventListener('click', function() {
+
+                    if (cartDrawer) {
+                        cartDrawer.classList.remove('active');
+                    }
+
+                    if (cartOverlay) {
+                        cartOverlay.classList.remove('active');
+                    }
+
+                    document.body.classList.remove('cart-open');
+                });
+            }
+
+
+            // =====================================================
+            // OVERLAY
+            // =====================================================
 
             if (cartOverlay) {
-                cartOverlay.classList.add('active');
+                cartOverlay.addEventListener('click', function() {
+
+                    if (cartDrawer) {
+                        cartDrawer.classList.remove('active');
+                    }
+
+                    cartOverlay.classList.remove('active');
+
+                    document.body.classList.remove('cart-open');
+                });
             }
 
-            document.body.classList.add('cart-open');
-        });
-    }
 
+            // =====================================================
+            // ESC
+            // =====================================================
 
-    // =====================================================
-    // CLOSE CART
-    // =====================================================
+            document.addEventListener('keydown', function(event) {
 
-    if (closeCart) {
-        closeCart.addEventListener('click', function () {
+                if (event.key === 'Escape') {
 
-            if (cartDrawer) {
-                cartDrawer.classList.remove('active');
-            }
+                    if (cartDrawer) {
+                        cartDrawer.classList.remove('active');
+                    }
 
-            if (cartOverlay) {
-                cartOverlay.classList.remove('active');
-            }
+                    if (cartOverlay) {
+                        cartOverlay.classList.remove('active');
+                    }
 
-            document.body.classList.remove('cart-open');
-        });
-    }
-
-
-    // =====================================================
-    // OVERLAY
-    // =====================================================
-
-    if (cartOverlay) {
-        cartOverlay.addEventListener('click', function () {
-
-            if (cartDrawer) {
-                cartDrawer.classList.remove('active');
-            }
-
-            cartOverlay.classList.remove('active');
-
-            document.body.classList.remove('cart-open');
-        });
-    }
-
-
-    // =====================================================
-    // ESC
-    // =====================================================
-
-    document.addEventListener('keydown', function (event) {
-
-        if (event.key === 'Escape') {
-
-            if (cartDrawer) {
-                cartDrawer.classList.remove('active');
-            }
-
-            if (cartOverlay) {
-                cartOverlay.classList.remove('active');
-            }
-
-            document.body.classList.remove('cart-open');
-        }
-    });
-
-
-    // =====================================================
-    // ADD TO CART AJAX
-    // =====================================================
-
-    document.querySelectorAll('.add-cart-form').forEach(function (form) {
-
-        form.addEventListener('submit', function (event) {
-
-            event.preventDefault();
-
-            const button = form.querySelector('.add-cart-btn');
-
-            if (!button) {
-                return;
-            }
-
-            button.disabled = true;
-            button.textContent = 'Adding...';
-
-            const url = form.getAttribute('action');
-
-            fetch(url, {
-                method: 'POST',
-
-                headers: {
-                    'X-CSRF-TOKEN': getCsrfToken(),
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
+                    document.body.classList.remove('cart-open');
                 }
-            })
+            });
 
-            .then(function (response) {
 
-                if (!response.ok) {
-                    throw new Error(
-                        'Request failed: ' + response.status
+            // =====================================================
+            // ADD TO CART AJAX
+            // =====================================================
+
+            document.querySelectorAll('.add-cart-form').forEach(function(form) {
+
+                form.addEventListener('submit', function(event) {
+
+                    event.preventDefault();
+
+                    const button = form.querySelector('.add-cart-btn');
+
+                    if (!button) {
+                        return;
+                    }
+
+                    button.disabled = true;
+                    button.textContent = 'Adding...';
+
+                    const url = form.getAttribute('action');
+
+                    fetch(url, {
+                            method: 'POST',
+
+                            headers: {
+                                'X-CSRF-TOKEN': getCsrfToken(),
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+
+                        .then(function(response) {
+
+                            if (!response.ok) {
+                                throw new Error(
+                                    'Request failed: ' + response.status
+                                );
+                            }
+
+                            return response.json();
+                        })
+
+                        .then(function(data) {
+
+                            if (data.success) {
+
+                                updateCartUI(data);
+
+                                showCartMessage(
+                                    data.message || 'Food added to cart.'
+                                );
+
+                            } else {
+
+                                showCartMessage(
+                                    data.message || 'Unable to add item.',
+                                    'error'
+                                );
+                            }
+                        })
+
+                        .catch(function(error) {
+
+                            console.error('Add cart error:', error);
+
+                            showCartMessage(
+                                'Something went wrong. Please try again.',
+                                'error'
+                            );
+                        })
+
+                        .finally(function() {
+
+                            button.disabled = false;
+                            button.textContent = 'Add to Cart';
+                        });
+                });
+            });
+
+
+            // =====================================================
+            // CART UPDATE AJAX (+ / -)
+            // =====================================================
+
+            document.addEventListener('submit', function(event) {
+
+                const form = event.target;
+
+                if (!form.classList.contains('cart-update-form')) {
+                    return;
+                }
+
+                event.preventDefault();
+
+                const button = form.querySelector('button');
+
+                if (button) {
+                    button.disabled = true;
+                }
+
+                /*
+                IMPORTANT:
+                form.action use nahi kar rahe.
+                getAttribute('action') use kar rahe hain.
+                */
+
+                const url = form.getAttribute('action');
+
+                console.log('Cart update URL:', url);
+
+                if (!url || url === '[object HTMLInputElement]') {
+
+                    console.error(
+                        'Invalid cart update URL:',
+                        url
                     );
-                }
-
-                return response.json();
-            })
-
-            .then(function (data) {
-
-                if (data.success) {
-
-                    updateCartUI(data);
 
                     showCartMessage(
-                        data.message || 'Food added to cart.'
-                    );
-
-                } else {
-
-                    showCartMessage(
-                        data.message || 'Unable to add item.',
+                        'Cart update URL is invalid.',
                         'error'
                     );
+
+                    if (button) {
+                        button.disabled = false;
+                    }
+
+                    return;
                 }
-            })
 
-            .catch(function (error) {
 
-                console.error('Add cart error:', error);
+                const formData = new FormData(form);
 
-                showCartMessage(
-                    'Something went wrong. Please try again.',
-                    'error'
-                );
-            })
 
-            .finally(function () {
+                fetch(url, {
+                        method: 'POST',
 
-                button.disabled = false;
-                button.textContent = 'Add to Cart';
+                        headers: {
+                            'X-CSRF-TOKEN': getCsrfToken(),
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+
+                        body: formData
+                    })
+
+                    .then(function(response) {
+
+                        console.log(
+                            'Cart update response status:',
+                            response.status
+                        );
+
+                        if (!response.ok) {
+                            throw new Error(
+                                'Request failed: ' + response.status
+                            );
+                        }
+
+                        return response.json();
+                    })
+
+                    .then(function(data) {
+
+                        console.log(
+                            'Cart update response:',
+                            data
+                        );
+
+                        if (data.success) {
+
+                            updateCartUI(data);
+
+                        } else {
+
+                            showCartMessage(
+                                data.message || 'Unable to update cart.',
+                                'error'
+                            );
+                        }
+                    })
+
+                    .catch(function(error) {
+
+                        console.error(
+                            'Cart update error:',
+                            error
+                        );
+
+                        showCartMessage(
+                            'Something went wrong. Please try again.',
+                            'error'
+                        );
+                    })
+
+                    .finally(function() {
+
+                        if (button) {
+                            button.disabled = false;
+                        }
+                    });
             });
-        });
-    });
 
 
-    // =====================================================
-    // CART UPDATE AJAX (+ / -)
-    // =====================================================
+            // =====================================================
+            // REMOVE ITEM AJAX
+            // =====================================================
 
-    document.addEventListener('submit', function (event) {
+            document.addEventListener('submit', function(event) {
 
-        const form = event.target;
+                const form = event.target;
 
-        if (!form.classList.contains('cart-update-form')) {
-            return;
-        }
+                if (!form.classList.contains('cart-remove-form')) {
+                    return;
+                }
 
-        event.preventDefault();
+                event.preventDefault();
 
-        const button = form.querySelector('button');
+                const button = form.querySelector('button');
 
-        if (button) {
-            button.disabled = true;
-        }
+                if (button) {
+                    button.disabled = true;
+                }
 
-        /*
-        IMPORTANT:
-        form.action use nahi kar rahe.
-        getAttribute('action') use kar rahe hain.
-        */
 
-        const url = form.getAttribute('action');
+                const url = form.getAttribute('action');
 
-        console.log('Cart update URL:', url);
-
-        if (!url || url === '[object HTMLInputElement]') {
-
-            console.error(
-                'Invalid cart update URL:',
-                url
-            );
-
-            showCartMessage(
-                'Cart update URL is invalid.',
-                'error'
-            );
-
-            if (button) {
-                button.disabled = false;
-            }
-
-            return;
-        }
-
-
-        const formData = new FormData(form);
-
-
-        fetch(url, {
-            method: 'POST',
-
-            headers: {
-                'X-CSRF-TOKEN': getCsrfToken(),
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-
-            body: formData
-        })
-
-        .then(function (response) {
-
-            console.log(
-                'Cart update response status:',
-                response.status
-            );
-
-            if (!response.ok) {
-                throw new Error(
-                    'Request failed: ' + response.status
-                );
-            }
-
-            return response.json();
-        })
-
-        .then(function (data) {
-
-            console.log(
-                'Cart update response:',
-                data
-            );
-
-            if (data.success) {
-
-                updateCartUI(data);
-
-            } else {
-
-                showCartMessage(
-                    data.message || 'Unable to update cart.',
-                    'error'
-                );
-            }
-        })
-
-        .catch(function (error) {
-
-            console.error(
-                'Cart update error:',
-                error
-            );
-
-            showCartMessage(
-                'Something went wrong. Please try again.',
-                'error'
-            );
-        })
-
-        .finally(function () {
-
-            if (button) {
-                button.disabled = false;
-            }
-        });
-    });
-
-
-    // =====================================================
-    // REMOVE ITEM AJAX
-    // =====================================================
-
-    document.addEventListener('submit', function (event) {
-
-        const form = event.target;
-
-        if (!form.classList.contains('cart-remove-form')) {
-            return;
-        }
-
-        event.preventDefault();
-
-        const button = form.querySelector('button');
-
-        if (button) {
-            button.disabled = true;
-        }
-
-
-        const url = form.getAttribute('action');
-
-        console.log(
-            'Remove cart URL:',
-            url
-        );
-
-
-        if (!url || url === '[object HTMLInputElement]') {
-
-            console.error(
-                'Invalid remove URL:',
-                url
-            );
-
-            showCartMessage(
-                'Remove URL is invalid.',
-                'error'
-            );
-
-            if (button) {
-                button.disabled = false;
-            }
-
-            return;
-        }
-
-
-        fetch(url, {
-            method: 'DELETE',
-
-            headers: {
-                'X-CSRF-TOKEN': getCsrfToken(),
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-
-        .then(function (response) {
-
-            if (!response.ok) {
-                throw new Error(
-                    'Request failed: ' + response.status
-                );
-            }
-
-            return response.json();
-        })
-
-        .then(function (data) {
-
-            if (data.success) {
-
-                updateCartUI(data);
-
-                showCartMessage(
-                    data.message ||
-                    'Item removed from cart.'
+                console.log(
+                    'Remove cart URL:',
+                    url
                 );
 
-            } else {
 
-                showCartMessage(
-                    data.message ||
-                    'Unable to remove item.',
-                    'error'
-                );
-            }
-        })
+                if (!url || url === '[object HTMLInputElement]') {
 
-        .catch(function (error) {
-
-            console.error(
-                'Remove cart error:',
-                error
-            );
-
-            showCartMessage(
-                'Something went wrong. Please try again.',
-                'error'
-            );
-        })
-
-        .finally(function () {
-
-            if (button) {
-                button.disabled = false;
-            }
-        });
-    });
-
-
-    // =====================================================
-    // UPDATE CART UI
-    // =====================================================
-
-    function updateCartUI(data) {
-
-        const cart = data.cart || {};
-
-        const cartBody =
-            document.querySelector('.cart-body');
-
-
-        // -------------------------------------------------
-        // UPDATE CART COUNT
-        // -------------------------------------------------
-
-        document
-            .querySelectorAll('.cart-count-text')
-            .forEach(function (element) {
-
-                element.textContent =
-                    data.cartCount +
-                    (
-                        data.cartCount === 1
-                            ? ' item'
-                            : ' items'
+                    console.error(
+                        'Invalid remove URL:',
+                        url
                     );
+
+                    showCartMessage(
+                        'Remove URL is invalid.',
+                        'error'
+                    );
+
+                    if (button) {
+                        button.disabled = false;
+                    }
+
+                    return;
+                }
+
+
+                fetch(url, {
+                        method: 'DELETE',
+
+                        headers: {
+                            'X-CSRF-TOKEN': getCsrfToken(),
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+
+                    .then(function(response) {
+
+                        if (!response.ok) {
+                            throw new Error(
+                                'Request failed: ' + response.status
+                            );
+                        }
+
+                        return response.json();
+                    })
+
+                    .then(function(data) {
+
+                        if (data.success) {
+
+                            updateCartUI(data);
+
+                            showCartMessage(
+                                data.message ||
+                                'Item removed from cart.'
+                            );
+
+                        } else {
+
+                            showCartMessage(
+                                data.message ||
+                                'Unable to remove item.',
+                                'error'
+                            );
+                        }
+                    })
+
+                    .catch(function(error) {
+
+                        console.error(
+                            'Remove cart error:',
+                            error
+                        );
+
+                        showCartMessage(
+                            'Something went wrong. Please try again.',
+                            'error'
+                        );
+                    })
+
+                    .finally(function() {
+
+                        if (button) {
+                            button.disabled = false;
+                        }
+                    });
             });
 
 
-        // -------------------------------------------------
-        // CART BODY CHECK
-        // -------------------------------------------------
+            // =====================================================
+            // UPDATE CART UI
+            // =====================================================
 
-        if (!cartBody) {
-            return;
-        }
+            function updateCartUI(data) {
+
+                const cart = data.cart || {};
+
+                const cartBody =
+                    document.querySelector('.cart-body');
 
 
-        // -------------------------------------------------
-        // EMPTY CART
-        // -------------------------------------------------
+                // -------------------------------------------------
+                // UPDATE CART COUNT
+                // -------------------------------------------------
 
-        if (Number(data.cartCount) === 0) {
+                document
+                    .querySelectorAll('.cart-count-text')
+                    .forEach(function(element) {
 
-            cartBody.innerHTML = `
+                        element.textContent =
+                            data.cartCount +
+                            (
+                                data.cartCount === 1 ?
+                                ' item' :
+                                ' items'
+                            );
+                    });
+
+
+                // -------------------------------------------------
+                // CART BODY CHECK
+                // -------------------------------------------------
+
+                if (!cartBody) {
+                    return;
+                }
+
+
+                // -------------------------------------------------
+                // EMPTY CART
+                // -------------------------------------------------
+
+                if (Number(data.cartCount) === 0) {
+
+                    cartBody.innerHTML = `
                 <div class="empty-cart">
 
                     <div class="empty-cart-icon">
@@ -818,34 +865,34 @@ document.addEventListener('DOMContentLoaded', function () {
             `;
 
 
-            const existingFooter =
-                document.querySelector('.cart-footer');
+                    const existingFooter =
+                        document.querySelector('.cart-footer');
 
 
-            if (existingFooter) {
-                existingFooter.remove();
-            }
+                    if (existingFooter) {
+                        existingFooter.remove();
+                    }
 
 
-            return;
-        }
+                    return;
+                }
 
 
-        // -------------------------------------------------
-        // BUILD CART ITEMS
-        // -------------------------------------------------
+                // -------------------------------------------------
+                // BUILD CART ITEMS
+                // -------------------------------------------------
 
-        let cartHTML = '';
-
-
-        Object.values(cart).forEach(function (item) {
-
-            const itemTotal =
-                Number(item.price) *
-                Number(item.quantity);
+                let cartHTML = '';
 
 
-            cartHTML += `
+                Object.values(cart).forEach(function(item) {
+
+                    const itemTotal =
+                        Number(item.price) *
+                        Number(item.quantity);
+
+
+                    cartHTML += `
 
                 <div
                     class="cart-item"
@@ -973,38 +1020,38 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
 
             `;
-        });
+                });
 
 
-        cartBody.innerHTML = cartHTML;
+                cartBody.innerHTML = cartHTML;
 
 
-        // -------------------------------------------------
-        // UPDATE / CREATE FOOTER
-        // -------------------------------------------------
+                // -------------------------------------------------
+                // UPDATE / CREATE FOOTER
+                // -------------------------------------------------
 
-        let cartFooter =
-            document.querySelector('.cart-footer');
-
-
-        if (!cartFooter) {
-
-            cartFooter =
-                document.createElement('div');
-
-            cartFooter.className =
-                'cart-footer';
+                let cartFooter =
+                    document.querySelector('.cart-footer');
 
 
-            if (cartDrawer) {
-                cartDrawer.appendChild(
-                    cartFooter
-                );
-            }
-        }
+                if (!cartFooter) {
+
+                    cartFooter =
+                        document.createElement('div');
+
+                    cartFooter.className =
+                        'cart-footer';
 
 
-        cartFooter.innerHTML = `
+                    if (cartDrawer) {
+                        cartDrawer.appendChild(
+                            cartFooter
+                        );
+                    }
+                }
+
+
+                cartFooter.innerHTML = `
 
             <div class="cart-total">
 
@@ -1072,110 +1119,245 @@ document.addEventListener('DOMContentLoaded', function () {
             </form>
 
         `;
-    }
+            }
 
 
-    // =====================================================
-    // CSRF TOKEN
-    // =====================================================
+            // =====================================================
+            // CSRF TOKEN
+            // =====================================================
 
-    function getCsrfToken() {
+            function getCsrfToken() {
 
-        const meta =
-            document.querySelector(
-                'meta[name="csrf-token"]'
-            );
-
-
-        if (meta) {
-
-            return meta.getAttribute(
-                'content'
-            );
-        }
+                const meta =
+                    document.querySelector(
+                        'meta[name="csrf-token"]'
+                    );
 
 
-        const input =
-            document.querySelector(
-                'input[name="_token"]'
-            );
+                if (meta) {
 
-
-        return input
-            ? input.value
-            : '';
-    }
-
-
-    // =====================================================
-    // MESSAGE
-    // =====================================================
-
-    function showCartMessage(
-        message,
-        type = 'success'
-    ) {
-
-        const oldMessage =
-            document.querySelector(
-                '.cart-message'
-            );
-
-
-        if (oldMessage) {
-            oldMessage.remove();
-        }
-
-
-        const messageBox =
-            document.createElement('div');
-
-
-        messageBox.className =
-            'cart-message ' +
-            (
-                type === 'error'
-                    ? 'cart-message-error'
-                    : ''
-            );
-
-
-        messageBox.textContent =
-            message;
-
-
-        document.body.appendChild(
-            messageBox
-        );
-
-
-        setTimeout(function () {
-
-            messageBox.classList.add(
-                'show'
-            );
-
-        }, 10);
-
-
-        setTimeout(function () {
-
-            messageBox.classList.remove(
-                'show'
-            );
-
-
-            setTimeout(function () {
-
-                if (messageBox) {
-                    messageBox.remove();
+                    return meta.getAttribute(
+                        'content'
+                    );
                 }
 
-            }, 300);
 
-        }, 2500);
-    }
+                const input =
+                    document.querySelector(
+                        'input[name="_token"]'
+                    );
 
-});
-</script>
+
+                return input ?
+                    input.value :
+                    '';
+            }
+
+
+            // =====================================================
+            // MESSAGE
+            // =====================================================
+
+            function showCartMessage(
+                message,
+                type = 'success'
+            ) {
+
+                const oldMessage =
+                    document.querySelector(
+                        '.cart-message'
+                    );
+
+
+                if (oldMessage) {
+                    oldMessage.remove();
+                }
+
+
+                const messageBox =
+                    document.createElement('div');
+
+
+                messageBox.className =
+                    'cart-message ' +
+                    (
+                        type === 'error' ?
+                        'cart-message-error' :
+                        ''
+                    );
+
+
+                messageBox.textContent =
+                    message;
+
+
+                document.body.appendChild(
+                    messageBox
+                );
+
+
+                setTimeout(function() {
+
+                    messageBox.classList.add(
+                        'show'
+                    );
+
+                }, 10);
+
+
+                setTimeout(function() {
+
+                    messageBox.classList.remove(
+                        'show'
+                    );
+
+
+                    setTimeout(function() {
+
+                        if (messageBox) {
+                            messageBox.remove();
+                        }
+
+                    }, 300);
+
+                }, 2500);
+            }
+
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const searchForm = document.getElementById('foodSearchForm');
+            const searchInput = document.getElementById('foodSearchInput');
+            const clearButton = document.getElementById('clearFoodSearch');
+            const foodResults = document.getElementById('foodResults');
+
+            if (!searchForm || !searchInput || !foodResults) {
+                return;
+            }
+
+            let searchTimer = null;
+
+
+            function searchFoods() {
+
+                const search = searchInput.value.trim();
+
+                const url = new URL(
+                    "{{ route('home') }}",
+                    window.location.origin
+                );
+
+                if (search !== '') {
+                    url.searchParams.set('search', search);
+                }
+
+                foodResults.style.opacity = '0.5';
+
+
+                fetch(url.toString(), {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => {
+
+                        if (!response.ok) {
+                            throw new Error('Search request failed.');
+                        }
+
+                        return response.text();
+
+                    })
+                    .then(html => {
+
+                        const parser = new DOMParser();
+
+                        const doc = parser.parseFromString(
+                            html,
+                            'text/html'
+                        );
+
+                        const newResults =
+                            doc.getElementById('foodResults');
+
+                        if (newResults) {
+
+                            foodResults.innerHTML =
+                                newResults.innerHTML;
+
+                        }
+
+                        foodResults.style.opacity = '1';
+
+                        window.history.replaceState({},
+                            '',
+                            url.toString()
+                        );
+
+                    })
+                    .catch(error => {
+
+                        console.error(error);
+
+                        foodResults.style.opacity = '1';
+
+                    });
+
+            }
+
+
+            searchInput.addEventListener('input', function() {
+
+                const value = searchInput.value.trim();
+
+                if (value !== '') {
+
+                    clearButton.style.display = 'block';
+
+                } else {
+
+                    clearButton.style.display = 'none';
+
+                }
+
+
+                clearTimeout(searchTimer);
+
+                searchTimer = setTimeout(function() {
+
+                    searchFoods();
+
+                }, 300);
+
+            });
+
+
+            searchForm.addEventListener('submit', function(event) {
+
+                event.preventDefault();
+
+                clearTimeout(searchTimer);
+
+                searchFoods();
+
+            });
+
+
+            clearButton.addEventListener('click', function() {
+
+                searchInput.value = '';
+
+                clearButton.style.display = 'none';
+
+                searchFoods();
+
+                searchInput.focus();
+
+            });
+
+        });
+    </script>
 @endpush

@@ -10,7 +10,8 @@ use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AdminDashboardController;
-
+use App\Http\Controllers\AdminRoleController;
+use App\Http\Controllers\AdminPermissionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -119,62 +120,159 @@ Route::middleware('admin')
 
         /*
         |--------------------------------------------------------------------------
-        | Admin Dashboard
+        | Dashboard
         |--------------------------------------------------------------------------
         */
 
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])
+            ->middleware('permission:dashboard.view')
             ->name('admin.dashboard');
 
 
         /*
         |--------------------------------------------------------------------------
-        | Food Management
+        | Foods
         |--------------------------------------------------------------------------
-        |
-        | Route names intentionally remain:
-        | foods.index
-        | foods.create
-        | foods.store
-        | foods.show
-        | foods.edit
-        | foods.update
-        | foods.destroy
-        |
-        | So your existing food Blade files don't need route-name changes.
-        |
         */
 
-        Route::resource('foods', FoodController::class);
+        Route::get('/foods', [FoodController::class, 'index'])
+            ->middleware('permission:foods.view')
+            ->name('foods.index');
+
+        Route::get('/foods/create', [FoodController::class, 'create'])
+            ->middleware('permission:foods.create')
+            ->name('foods.create');
+
+        Route::post('/foods', [FoodController::class, 'store'])
+            ->middleware('permission:foods.create')
+            ->name('foods.store');
+
+        Route::get('/foods/{food}', [FoodController::class, 'show'])
+            ->middleware('permission:foods.view')
+            ->name('foods.show');
+
+        Route::get('/foods/{food}/edit', [FoodController::class, 'edit'])
+            ->middleware('permission:foods.edit')
+            ->name('foods.edit');
+
+        Route::put('/foods/{food}', [FoodController::class, 'update'])
+            ->middleware('permission:foods.edit')
+            ->name('foods.update');
+
+        Route::delete('/foods/{food}', [FoodController::class, 'destroy'])
+            ->middleware('permission:foods.delete')
+            ->name('foods.destroy');
 
 
         /*
         |--------------------------------------------------------------------------
-        | Admin Orders
+        | Orders
         |--------------------------------------------------------------------------
         */
 
         Route::get('/orders', [AdminOrderController::class, 'index'])
+            ->middleware('permission:orders.view')
             ->name('admin.orders.index');
 
         Route::get('/orders/{order}', [AdminOrderController::class, 'show'])
+            ->middleware('permission:orders.view')
             ->name('admin.orders.show');
 
         Route::patch('/orders/{order}/accept', [AdminOrderController::class, 'accept'])
+            ->middleware('permission:orders.accept')
             ->name('admin.orders.accept');
 
 
         /*
         |--------------------------------------------------------------------------
-        | Admin Users
+        | Users
         |--------------------------------------------------------------------------
         */
 
         Route::get('/users', [AdminUserController::class, 'index'])
+            ->middleware('permission:users.view')
             ->name('admin.users.index');
 
+        Route::get('/users/create', [AdminUserController::class, 'create'])
+            ->middleware('permission:users.create')
+            ->name('admin.users.create');
+
+        Route::post('/users', [AdminUserController::class, 'store'])
+            ->middleware('permission:users.create')
+            ->name('admin.users.store');
+
         Route::get('/users/{user}', [AdminUserController::class, 'show'])
+            ->middleware('permission:users.view')
             ->name('admin.users.show');
+
+        Route::get('/users/{user}/edit', [AdminUserController::class, 'edit'])
+            ->middleware('permission:users.edit')
+            ->name('admin.users.edit');
+
+        Route::put('/users/{user}', [AdminUserController::class, 'update'])
+            ->middleware('permission:users.edit')
+            ->name('admin.users.update');
+
+        Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])
+            ->middleware('permission:users.delete')
+            ->name('admin.users.destroy');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Roles
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get('/roles', [AdminRoleController::class, 'index'])
+            ->middleware('permission:roles.view')
+            ->name('roles.index');
+
+        Route::get('/roles/create', [AdminRoleController::class, 'create'])
+            ->middleware('permission:roles.create')
+            ->name('roles.create');
+
+        Route::post('/roles', [AdminRoleController::class, 'store'])
+            ->middleware('permission:roles.create')
+            ->name('roles.store');
+
+        Route::get('/roles/{role}/edit', [AdminRoleController::class, 'edit'])
+            ->middleware('permission:roles.edit')
+            ->name('roles.edit');
+
+        Route::put('/roles/{role}', [AdminRoleController::class, 'update'])
+            ->middleware('permission:roles.edit')
+            ->name('roles.update');
+
+        Route::delete('/roles/{role}', [AdminRoleController::class, 'destroy'])
+            ->middleware('permission:roles.delete')
+            ->name('roles.destroy');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Role Permissions
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get('/roles/{role}/permissions', [AdminRoleController::class, 'managePermissions'])
+            ->middleware('permission:roles.edit')
+            ->name('roles.permissions.edit');
+
+        Route::put('/roles/{role}/permissions', [AdminRoleController::class, 'updatePermissions'])
+            ->middleware('permission:roles.edit')
+            ->name('roles.permissions.update');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Permissions Catalogue
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get('/permissions', [AdminPermissionController::class, 'index'])
+            ->middleware('permission:permissions.view')
+            ->name('permissions.index');
 
 
         /*

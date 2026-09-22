@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -9,13 +10,11 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    // Show Register Page
     public function showRegister()
     {
         return view('auth.register');
     }
 
-    // Register User
     public function register(Request $request)
     {
         $request->validate([
@@ -26,12 +25,23 @@ class AuthController extends Controller
             'password' => 'required|min:6|confirmed',
         ]);
 
+        $userRole = Role::where('slug', 'user')->first();
+
+        if (!$userRole) {
+            return back()
+                ->withErrors([
+                    'email' => 'Default User role is not configured.',
+                ])
+                ->withInput();
+        }
+
         User::create([
             'emp_code' => $request->emp_code,
             'name' => $request->name,
             'email' => $request->email,
             'department' => $request->department,
             'password' => Hash::make($request->password),
+            'role_id' => $userRole->id,
         ]);
 
         return redirect()
@@ -42,13 +52,11 @@ class AuthController extends Controller
             );
     }
 
-    // Show Login Page
     public function showLogin()
     {
         return view('auth.login');
     }
 
-    // Login User
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -70,7 +78,6 @@ class AuthController extends Controller
             ->onlyInput('email');
     }
 
-    // Logout User
     public function logout(Request $request)
     {
         Auth::logout();

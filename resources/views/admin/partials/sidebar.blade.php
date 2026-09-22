@@ -37,6 +37,15 @@
 
         </a>
 
+        <a href="{{ route('roles.index') }}" class="admin-nav-link {{ request()->routeIs('roles.*') ? 'active' : '' }}">
+            <span class="nav-icon">▣</span>
+            <span>Roles</span>
+        </a>
+
+        <a href="{{ route('permissions.index') }}" class="admin-nav-link {{ request()->routeIs('permissions.*') ? 'active' : '' }}">
+            <span class="nav-icon">✓</span>
+            <span>Permissions</span>
+        </a>
     </nav>
 
     <div class="admin-sidebar-bottom">

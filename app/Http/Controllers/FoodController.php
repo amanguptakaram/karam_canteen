@@ -14,8 +14,8 @@ class FoodController extends Controller
         $foods = Food::query()
             ->when($search, function ($query) use ($search) {
                 $query->where('name', 'like', "%{$search}%")
-                      ->orWhere('category', 'like', "%{$search}%")
-                      ->orWhere('price', 'like', "%{$search}%");
+                    ->orWhere('category', 'like', "%{$search}%")
+                    ->orWhere('price', 'like', "%{$search}%");
             })
             ->latest()
             ->get();
@@ -102,9 +102,21 @@ class FoodController extends Controller
     }
 
 
-    public function home()
+    public function home(Request $request)
     {
-        $foods = Food::where('is_available', true)->get();
+        $query = Food::where('is_available', true);
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('category', 'like', '%' . $search . '%')
+                    ->orWhere('description', 'like', '%' . $search . '%');
+            });
+        }
+
+        $foods = $query->latest()->get();
 
         return view('home', compact('foods'));
     }

@@ -1606,3 +1606,122 @@ body.cart-open {
     margin-bottom: 20px;
     font-weight: 600;
 }
+
+/* ================= FOOD SEARCH ================= */
+
+.food-search-form {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+}
+
+.search-input-wrapper {
+    position: relative;
+    width: 320px;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 17px;
+    opacity: 0.65;
+    pointer-events: none;
+}
+
+#foodSearchInput {
+    width: 100%;
+    height: 48px;
+    padding: 0 45px 0 45px;
+
+    border: 1px solid #e7dccf;
+    border-radius: 14px;
+
+    background: #fffdf9;
+
+    color: #26313d;
+    font-family: inherit;
+    font-size: 15px;
+
+    outline: none;
+
+    box-shadow:
+        0 4px 14px rgba(31, 41, 55, 0.06);
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+#foodSearchInput::placeholder {
+    color: #9a9289;
+}
+
+#foodSearchInput:focus {
+    border-color: #d97706;
+    background: #ffffff;
+
+    box-shadow:
+        0 0 0 4px rgba(217, 119, 6, 0.10),
+        0 8px 20px rgba(31, 41, 55, 0.08);
+}
+
+.clear-search-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+
+    width: 28px;
+    height: 28px;
+
+    border: none;
+    border-radius: 50%;
+
+    background: #f3eee7;
+    color: #6b6258;
+
+    font-size: 20px;
+    line-height: 1;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease;
+}
+
+.clear-search-btn:hover {
+    background: #e8ded2;
+    color: #2f2a25;
+}
+
+
+/* ================= SEARCH RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+
+    .section-heading {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    .food-search-form {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .search-input-wrapper {
+        width: 100%;
+    }
+
+}

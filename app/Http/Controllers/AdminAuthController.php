@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 class AdminAuthController extends Controller
 {
     /**
-     * Show admin login page.
+     * Show admin/staff login page.
      */
     public function showLogin()
     {
@@ -16,7 +16,7 @@ class AdminAuthController extends Controller
     }
 
     /**
-     * Handle admin login.
+     * Handle admin/staff login.
      */
     public function login(Request $request)
     {
@@ -26,9 +26,10 @@ class AdminAuthController extends Controller
         ]);
 
         if (!Auth::attempt($credentials)) {
+
             return back()
                 ->withErrors([
-                    'email' => 'Invalid admin email or password.',
+                    'email' => 'Invalid email or password.',
                 ])
                 ->onlyInput('email');
         }
@@ -37,8 +38,16 @@ class AdminAuthController extends Controller
 
         $user = Auth::user();
 
-        // Only admin users are allowed.
-        if (!$user || $user->role !== 'admin') {
+        /*
+        |--------------------------------------------------------------------------
+        | Admin / Staff Access
+        |--------------------------------------------------------------------------
+        |
+        | Any user assigned to a role can use the admin/staff login.
+        |
+        */
+
+        if (!$user->role_id && $user->role !== 'admin') {
 
             Auth::logout();
 
@@ -47,7 +56,7 @@ class AdminAuthController extends Controller
 
             return back()
                 ->withErrors([
-                    'email' => 'You do not have admin access.',
+                    'email' => 'You do not have admin/staff access.',
                 ])
                 ->onlyInput('email');
         }
@@ -56,7 +65,7 @@ class AdminAuthController extends Controller
     }
 
     /**
-     * Handle admin logout.
+     * Handle admin/staff logout.
      */
     public function logout(Request $request)
     {
@@ -67,6 +76,9 @@ class AdminAuthController extends Controller
 
         return redirect()
             ->route('admin.login')
-            ->with('success', 'Admin logged out successfully.');
+            ->with(
+                'success',
+                'You have been logged out successfully.'
+            );
     }
 }
